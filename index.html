@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCB Work Time & Price Calculator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --background-color: #f1f5f9;
+            --card-color: #ffffff;
+            --text-color: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 20px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 768px;
+            }
+        }
+
+        .card {
+            background: var(--card-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: 16px;
+            margin: -24px -24px 24px -24px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--text-color);
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .button-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .button-primary:hover {
+            background: var(--secondary-color);
+        }
+
+        .button-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .button-danger:hover {
+            background: #dc2626;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .log-entry {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .log-entry p {
+            margin-bottom: 8px;
+        }
+
+        .work-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .work-status.active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error {
+            color: var(--danger-color);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .logo {
+            width: 100px;
+            height: auto;
+            object-fit: contain;
+        }
+        
+        .login-title {
+            margin: 0;
+            font-size: 24px;
+            color: var(--text-color);
+        }
+
+        /* Ensure mobile responsiveness */
+        @media (max-width: 480px) {
+            .header-container {
+                gap: 12px;
+            }
+            
+            .logo {
+                width: 80px;
+            }
+            
+            .login-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="app">
+        <div id="login-section" class="card">
+            <div class="header-container">
+                <img src="./images/JCB_Logo_PNG3.png" alt="JCB Logo" class="logo">
+                <h1 class="login-title">JCB WORKER</h1>
+            </div>
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username" autocomplete="username">
+                <div id="username-error" class="error"></div>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+                <div id="password-error" class="error"></div>
+            </div>
+            <button id="login-btn" class="button button-primary">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button id="signup-btn" class="button button-primary">
+                <i class="fas fa-user-plus"></i> Sign Up
+            </button>
+            <div style="text-align: center; margin-top: 20px; color: #64748b; font-size: 14px;">
+                App designed by Suman Reddy
+            </div>
+        </div>
+
+        <div id="work-section" style="display: none;">
+            <div class="card">
+                <div class="header">
+                    <div class="user-info">
+                        <div class="user-avatar" id="user-avatar"></div>
+                        <div>
+                            <h3 id="welcome-message" style="color: white; margin: 0;"></h3>
+                            <small style="color: #e2e8f0;">JCB Operator</small>
+                        </div>
+                    </div>
+                    <button id="logout-btn" class="button" style="width: auto; margin: 0; padding: 8px 16px;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="job-number">Job Number:</label>
+                    <input type="text" id="job-number" placeholder="Enter job number">
+                </div>
+
+                <div class="form-group">
+                    <label for="price-per-hour">Price per Hour (₹):</label>
+                    <input type="number" id="price-per-hour" placeholder="Enter price per hour in ₹" min="0"
+                        step="0.01">
+                </div>
+
+                <button id="start-work-btn" class="button button-primary">
+                    <i class="fas fa-play"></i> Start Work
+                </button>
+                <button id="stop-work-btn" class="button button-danger" style="display: none;">
+                    <i class="fas fa-stop"></i> Stop Work
+                </button>
+
+                <div id="loader" class="loader">
+                    <div class="loader-spinner"></div>
+                    <p style="margin-top: 12px;">Work in progress...</p>
+                    <p id="timer" style="font-size: 24px; font-weight: bold; margin-top: 8px;">00:00:00</p>
+                </div>
+
+                <div id="work-details" style="display: none;" class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Start Time</h4>
+                        <div id="start-time" class="value">--:--</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>End Time</h4>
+                        <div id="end-time" class="value">--:--</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Total Time</h4>
+                        <div id="total-time" class="value">0h</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Total Price</h4>
+                        <div id="total-price" class="value">₹0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>
+                    <i class="fas fa-history"></i> Work History
+                </h3>
+                <div id="log"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const app = document.getElementById('app');
+        const loginSection = document.getElementById('login-section');
+        const workSection = document.getElementById('work-section');
+        const startWorkBtn = document.getElementById('start-work-btn');
+        const stopWorkBtn = document.getElementById('stop-work-btn');
+        const pricePerHourInput = document.getElementById('price-per-hour');
+        const jobNumberInput = document.getElementById('job-number');
+        const log = document.getElementById('log');
+        const workDetails = document.getElementById('work-details');
+        const startTimeEl = document.getElementById('start-time');
+        const endTimeEl = document.getElementById('end-time');
+        const totalTimeEl = document.getElementById('total-time');
+        const totalPriceEl = document.getElementById('total-price');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const usernameError = document.getElementById('username-error');
+        const passwordError = document.getElementById('password-error');
+        const loader = document.getElementById('loader');
+        const timer = document.getElementById('timer');
+        const userAvatar = document.getElementById('user-avatar');
+        const welcomeMessage = document.getElementById('welcome-message');
+
+        // State management
+        let currentUser = null;
+        let userData = JSON.parse(localStorage.getItem('userData')) || {};
+        let workLogs = JSON.parse(localStorage.getItem('workLogs')) || {};
+        let startTime, endTime;
+        let timerInterval;
+
+        // Timer function
+        const updateTimer = () => {
+            const now = new Date();
+            const diff = Math.floor((now - startTime) / 1000);
+            const hours = Math.floor(diff / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
+            const seconds = diff % 60;
+            timer.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        };
+
+        // Input validation
+        const validateInput = (username, password) => {
+            const errors = {
+                username: [],
+                password: []
+            };
+
+            if (!username) {
+                errors.username.push('Username is required');
+            } else if (username.length < 3) {
+                errors.username.push('Username must be at least 3 characters long');
+            } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                errors.username.push('Username can only contain letters, numbers, and underscores');
+            }
+
+            if (!password) {
+                errors.password.push('Password is required');
+            } else if (password.length < 8) {
+                errors.password.push('Password must be at least 8 characters long');
+            } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+                errors.password.push('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+            }
+
+            return errors;
+        };
+
+        // Display error messages
+        const showErrors = (errors) => {
+            usernameError.textContent = errors.username.join(', ');
+            passwordError.textContent = errors.password.join(', ');
+            return errors.username.length === 0 && errors.password.length === 0;
+        };
+
+        // Clear error messages
+        const clearErrors = () => {
+            usernameError.textContent = '';
+            passwordError.textContent = '';
+        };
+
+        // Update user info display
+        const updateUserDisplay = () => {
+            if (currentUser) {
+                userAvatar.textContent = currentUser.charAt(0).toUpperCase();
+                welcomeMessage.textContent = `Welcome, ${currentUser}!`;
+            }
+        };
+
+        // Authentication functions
+        const login = () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            clearErrors();
+            const errors = validateInput(username, password);
+
+            if (!showErrors(errors)) {
+                return;
+            }
+
+            if (userData[username] && userData[username].password === password) {
+                currentUser = username;
+                loginSection.style.display = 'none';
+                workSection.style.display = 'block';
+                updateUserDisplay();
+                loadLogs();
+
+                // Clear sensitive data
+                usernameInput.value = '';
+                passwordInput.value = '';
+            } else {
+                alert('Invalid username or password');
+            }
+        };
+
+        const logout = () => {
+            currentUser = null;
+            loginSection.style.display = 'block';
+            workSection.style.display = 'none';
+            clearWorkSession();
+        };
+
+        const signup = () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            clearErrors();
+            const errors = validateInput(username, password);
+
+            if (!showErrors(errors)) {
+                return;
+            }
+
+            if (!userData[username]) {
+                userData[username] = {
+                    password: password,
+                    created: new Date().toISOString()
+                };
+                localStorage.setItem('userData', JSON.stringify(userData));
+                alert('Sign up successful! You can now log in.');
+
+                // Clear form
+                usernameInput.value = '';
+                passwordInput.value = '';
+            } else {
+                alert('Username already exists!');
+            }
+        };
+
+        // Clear work session
+        const clearWorkSession = () => {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            loader.style.display = 'none';
+            startWorkBtn.style.display = 'block';
+            stopWorkBtn.style.display = 'none';
+            workDetails.style.display = 'none';
+            pricePerHourInput.disabled = false;
+            jobNumberInput.disabled = false;
+            timer.textContent = '00:00:00';
+        };
+
+        // Work tracking functions
+        const getLocation = async () => {
+            if (navigator.geolocation) {
+                try {
+                    const position = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            timeout: 10000,
+                            maximumAge: 0
+                        });
+                    });
+
+                    try {
+                        const response = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
+                        );
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            return data.display_name || `${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
+                        }
+                    } catch (error) {
+                        return `${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
+                    }
+                } catch (error) {
+                    console.error('Error getting location:', error);
+                    return 'Location not available';
+                }
+            }
+            return 'Geolocation not supported';
+        };
+
+        const formatINR = (number) => {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            }).format(number);
+        };
+
+        const startWork = async () => {
+            const price = parseFloat(pricePerHourInput.value);
+            const jobNumber = jobNumberInput.value.trim();
+
+            if (!price || price <= 0) {
+                alert('Please enter a valid price per hour');
+                return;
+            }
+
+            if (!jobNumber) {
+                alert('Please enter a job number');
+                return;
+            }
+
+            startTime = new Date();
+            startTimeEl.textContent = startTime.toLocaleTimeString();
+            startWorkBtn.style.display = 'none';
+            stopWorkBtn.style.display = 'block';
+            loader.style.display = 'block';
+            pricePerHourInput.disabled = true;
+            jobNumberInput.disabled = true;
+            workDetails.style.display = 'none';
+
+            // Start timer
+            timerInterval = setInterval(updateTimer, 1000);
+        };
+
+        const stopWork = async () => {
+            if (!startTime) {
+                alert('No work session in progress');
+                return;
+            }
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            endTime = new Date();
+            endTimeEl.textContent = endTime.toLocaleTimeString();
+
+            const totalTimeHours = ((endTime - startTime) / 1000 / 3600).toFixed(2);
+            totalTimeEl.textContent = `${totalTimeHours}h`;
+
+            const pricePerHour = parseFloat(pricePerHourInput.value);
+            const totalPrice = totalTimeHours * pricePerHour;
+            totalPriceEl.textContent = formatINR(totalPrice);
+
+            const location = await getLocation();
+
+            const logEntry = {
+                jobNumber: jobNumberInput.value.trim(),
+                date: startTime.toLocaleDateString(),
+                startTime: startTime.toLocaleTimeString(),
+                endTime: endTime.toLocaleTimeString(),
+                totalTime: `${totalTimeHours} hours`,
+                totalPrice: formatINR(totalPrice),
+                pricePerHour: formatINR(pricePerHour),
+                location: location,
+                timestamp: Date.now() // For sorting
+            };
+
+            if (!workLogs[currentUser]) {
+                workLogs[currentUser] = [];
+            }
+            workLogs[currentUser].unshift(logEntry); // Add to beginning of array
+            localStorage.setItem('workLogs', JSON.stringify(workLogs));
+
+            displayLog(logEntry);
+            workDetails.style.display = 'block';
+            loader.style.display = 'none';
+            startWorkBtn.style.display = 'block';
+            stopWorkBtn.style.display = 'none';
+            pricePerHourInput.disabled = false;
+            jobNumberInput.disabled = false;
+
+            // Reset start time
+            startTime = null;
+        };
+
+        const displayLog = (logEntry) => {
+            const logElement = document.createElement('div');
+            logElement.className = 'log-entry';
+            logElement.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h4 style="margin: 0;">Job #${logEntry.jobNumber}</h4>
+        <span class="work-status active">Completed</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <div>
+            <p><i class="far fa-calendar"></i> <strong>Date:</strong> ${logEntry.date}</p>
+            <p><i class="far fa-clock"></i> <strong>Start:</strong> ${logEntry.startTime}</p>
+            <p><i class="far fa-clock"></i> <strong>End:</strong> ${logEntry.endTime}</p>
+        </div>
+        <div>
+            <p><i class="fas fa-rupee-sign"></i> <strong>Rate:</strong> ${logEntry.pricePerHour}/hr</p>
+            <p><i class="fas fa-clock"></i> <strong>Duration:</strong> ${logEntry.totalTime}</p>
+            <p><i class="fas fa-money-bill-wave"></i> <strong>Total:</strong> ${logEntry.totalPrice}</p>
+        </div>
+    </div>
+    <p><i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> ${logEntry.location}</p>
+`;
+            log.insertBefore(logElement, log.firstChild);
+        };
+
+        const loadLogs = () => {
+            log.innerHTML = '';
+            if (workLogs[currentUser]) {
+                // Sort logs by timestamp in descending order
+                const sortedLogs = [...workLogs[currentUser]].sort((a, b) =>
+                    (b.timestamp || 0) - (a.timestamp || 0)
+                );
+                sortedLogs.forEach(displayLog);
+            }
+        };
+
+        // Event listeners
+        loginBtn.addEventListener('click', login);
+        signupBtn.addEventListener('click', signup);
+        logoutBtn.addEventListener('click', logout);
+        startWorkBtn.addEventListener('click', startWork);
+        stopWorkBtn.addEventListener('click', stopWork);
+
+        // Prevent negative values in price input
+        pricePerHourInput.addEventListener('input', (e) => {
+            if (e.target.value < 0) {
+                e.target.value = 0;
+            }
+        });
+
+        // Handle Enter key
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (loginSection.style.display !== 'none') {
+                    e.preventDefault();
+                    login();
+                }
+            }
+        });
+
+        // Check for active work session on page load
+        window.addEventListener('load', () => {
+            clearWorkSession();
+        });
+
+        // Handle page visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && startTime) {
+                // Update timer immediately when page becomes visible
+                updateTimer();
+            }
+        });
+    </script>
+</body>
+
+</html>
