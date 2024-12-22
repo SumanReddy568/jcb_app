@@ -568,6 +568,12 @@
             pricePerHourInput.disabled = false;
             jobNumberInput.disabled = false;
             timer.textContent = '00:00:00';
+            
+            // Reset the display values
+            startTimeEl.textContent = '--:--';
+            endTimeEl.textContent = '--:--';
+            totalTimeEl.textContent = '0h';
+            totalPriceEl.textContent = '₹0';
         };
 
         // Work tracking functions
@@ -647,13 +653,14 @@
             }
 
             endTime = new Date();
-            endTimeEl.textContent = endTime.toLocaleTimeString();
-
             const totalTimeHours = ((endTime - startTime) / 1000 / 3600).toFixed(2);
-            totalTimeEl.textContent = `${totalTimeHours}h`;
-
             const pricePerHour = parseFloat(pricePerHourInput.value);
             const totalPrice = totalTimeHours * pricePerHour;
+
+            // Update work details display
+            startTimeEl.textContent = startTime.toLocaleTimeString();
+            endTimeEl.textContent = endTime.toLocaleTimeString();
+            totalTimeEl.textContent = `${totalTimeHours}h`;
             totalPriceEl.textContent = formatINR(totalPrice);
 
             const location = await getLocation();
@@ -667,25 +674,27 @@
                 totalPrice: formatINR(totalPrice),
                 pricePerHour: formatINR(pricePerHour),
                 location: location,
-                timestamp: Date.now() // For sorting
+                timestamp: Date.now()
             };
 
             if (!workLogs[currentUser]) {
                 workLogs[currentUser] = [];
             }
-            workLogs[currentUser].unshift(logEntry); // Add to beginning of array
+            workLogs[currentUser].unshift(logEntry);
             localStorage.setItem('workLogs', JSON.stringify(workLogs));
 
             displayLog(logEntry);
-            workDetails.style.display = 'block';
+            
+            // Make sure work details are visible
+            workDetails.style.display = 'grid';
             loader.style.display = 'none';
             startWorkBtn.style.display = 'block';
             stopWorkBtn.style.display = 'none';
             pricePerHourInput.disabled = false;
             jobNumberInput.disabled = false;
 
-            // Reset start time
-            startTime = null;
+            // Reset timer display but keep the values visible
+            timer.textContent = '00:00:00';
         };
 
         const displayLog = (logEntry) => {
